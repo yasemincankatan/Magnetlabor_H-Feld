@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magnetlabor – Simulation</title>
+
+<style>
+:root {
+  --ink: #153e39;
+  --accent: #006c57;
+  --line: #d4e2db;
+  --red: #d52232;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f1f5ef;
+  color: var(--ink);
+  font: 17px/1.6 system-ui, sans-serif;
+}
+
+header,
+main,
+footer {
+  max-width: 1040px;
+  margin: auto;
+  padding: 24px;
+}
+
+header {
+  padding-top: 36px;
+}
+
+h1 {
+  font-size: clamp(30px, 6vw, 48px);
+  line-height: 1.15;
+  margin: 10px 0;
+}
+
+h2 {
+  font-size: 28px;
+  line-height: 1.25;
+  margin: 8px 0 14px;
+}
+
+.kicker {
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 750;
+  color: var(--accent);
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+nav a {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+nav a[aria-current="step"] {
+  background: var(--ink);
+  color: white;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(18px, 4vw, 32px);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 28px;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.facts span {
+  background: #eaf3eb;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.relation-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.relation-card {
+  padding: 18px 10px;
+  text-align: center;
+  background: #f0f5ef;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.relation-formula {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  min-height: 110px;
+  font-family: "Cambria Math", "Times New Roman", serif;
+  font-size: clamp(32px, 6vw, 46px);
+  font-style: italic;
+}
+
+.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+  line-height: 1.1;
+  min-width: 1.1em;
+}
+
+.numerator {
+  padding: 0 8px 4px;
+  border-bottom: 2px solid currentColor;
+  font-style: normal;
+}
+
+.denominator {
+  padding: 4px 8px 0;
+}
+
+/* Geschwungenes l zur Unterscheidung von I und 1. */
+.length-symbol {
+  font-family: "Cambria Math", "Times New Roman", serif;
+}
+
+.relation-card strong {
+  font-size: clamp(14px, 3vw, 18px);
+}
+
+.relation-card p {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+.display {
+  background: #102e2b;
+  border-radius: 16px;
+  color: #b8ffe3;
+  padding: 20px;
+  margin: 16px 0;
+}
+
+.display .label {
+  font-size: 13px;
+  color: #d8eee5;
+}
+
+.reading {
+  font: clamp(32px, 7vw, 48px)/1.4 ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.reading small {
+  font-size: 20px;
+}
+
+.display output {
+  display: inline;
+}
+
+.h-reading {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #45635b;
+}
+
+.h-reading .value {
+  font: 28px/1.5 ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.h-reading small {
+  font-size: 17px;
+}
+
+.control {
+  background: #f0f5ef;
+  padding: 20px;
+  border-radius: 14px;
+  margin: 20px 0;
+}
+
+.control label {
+  display: block;
+  font-weight: 700;
+}
+
+.control output {
+  font-size: 23px;
+  display: block;
+  margin: 8px 0;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 40px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.limits {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  padding: 10px 16px;
+  border-radius: 10px;
+  min-height: 46px;
+  color: var(--ink);
+  background: white;
+}
+
+.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.minor {
+  font-size: 14px;
+  color: #506a62;
+}
+
+.note {
+  background: #fff6df;
+  border-left: 3px solid #d3a343;
+  padding: 16px;
+  border-radius: 0 10px 10px 0;
+  margin-top: 24px;
+}
+
+.note h3 {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+
+.note p {
+  margin: 8px 0;
+}
+
+svg {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  background: #f2f6f0;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.legend-current {
+  color: var(--red);
+}
+
+.legend-field {
+  color: var(--accent);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #d49825;
+  outline-offset: 4px;
+}
+
+details {
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+
+footer {
+  font-size: 13px;
+  color: #506a62;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  header,
+  main,
+  footer {
+    padding: 18px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  nav a {
+    font-size: 12px;
+    padding: 10px 7px;
+  }
+
+  .reading {
+    font-size: 42px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="kicker">
+    LF 5 · Magnetische Grundgrößen · 2. Ausbildungsjahr
+  </div>
+
+  <h1>Entdecke das Magnetfeld.</h1>
+
+  <p>
+    Untersuche die Abhängigkeiten der magnetischen Feldstärke H.
+  </p>
+
+  <nav aria-label="Versuche">
+    <a href="#versuch-1">01 · Stromstärke</a>
+    <a href="#versuch-2">02 · Windungszahl</a>
+    <a href="#versuch-3">03 · Spulenlänge</a>
+  </nav>
+</header>
+
+<main>
+  <article class="card">
+
+    <div class="kicker" id="stepLabel"></div>
+    <h2 id="title" tabindex="-1"></h2>
+    <p id="task"></p>
+
+    <div class="relation-choices">
+
+      <div class="relation-card">
+        <div
+          id="directFormula"
+          class="relation-formula"
+          role="math"
+          aria-label="H ist proportional zu I">
+
+          <span>H</span>
+          <span>∼</span>
+          <span id="directSymbol">I</span>
+        </div>
+
+        <strong>proportional</strong>
+        <p id="directExplanation">
+          Je größer I, desto größer H.
+        </p>
+      </div>
+
+      <div class="relation-card">
+        <div
+          id="inverseFormula"
+          class="relation-formula"
+          role="math"
+          aria-label="H ist proportional zu eins geteilt durch I">
+
+          <span>H</span>
+          <span>∼</span>
+
+          <span class="fraction">
+            <span class="numerator">1</span>
+            <span class="denominator" id="inverseSymbol">I</span>
+          </span>
+        </div>
+
+        <strong>antiproportional</strong>
+        <p id="inverseExplanation">
+          Je größer I, desto kleiner H.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="facts" id="facts"></div>
+
+    <div class="layout">
+
+      <section aria-label="Spule und Messgerät">
+
+        <svg
+          viewBox="0 0 560 285"
+          role="img"
+          aria-labelledby="diagramTitle diagramDesc">
+
+          <title id="diagramTitle">
+            Idealisierte Luftspule mit Stromrichtung und Magnetfeld
+          </title>
+
+          <desc id="diagramDesc">
+            Ein durchgehender, schraubenförmig gewickelter Leiter.
+            Ein roter Pfeil zeigt die technische Stromrichtung.
+            Grüne Pfeile zeigen die Richtung des Feldes H
+            im Inneren der Spule.
+            Die Dicke des roten Pfeils verändert sich mit I,
+            die Dicke der grünen Linien mit H.
+          </desc>
+
+          <defs>
+            <marker
+              id="fieldArrow"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="4"
+              markerHeight="4"
+              orient="auto">
+
+              <path
+                d="M 0 0 L 10 5 L 0 10 z"
+                fill="#00715b">
+              </path>
+            </marker>
+
+            <marker
+              id="currentArrow"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="3"
+              markerHeight="3"
+              orient="auto">
+
+              <path
+                d="M 0 0 L 10 5 L 0 10 z"
+                fill="#d52232">
+              </path>
+            </marker>
+          </defs>
+
+          <g id="coilBack"></g>
+          <g id="field"></g>
+          <g id="coilFront"></g>
+          <g id="current"></g>
+
+          <path
+            id="lengthLine"
+            stroke="#58746b"
+            fill="none">
+          </path>
+
+          <text
+            id="lengthText"
+            x="280"
+            y="225"
+            text-anchor="middle"
+            fill="#3c5d53"
+            font-size="17">
+          </text>
+
+          <text
+            x="280"
+            y="251"
+            text-anchor="middle"
+            fill="#58746b"
+            font-size="11">
+            Durchgehender Leiter · Windungen symbolisch dargestellt
+          </text>
+
+          <text
+            x="280"
+            y="269"
+            text-anchor="middle"
+            fill="#58746b"
+            font-size="11">
+            Geometrie und Pfeildicken nicht maßstäblich
+          </text>
+        </svg>
+
+        <div class="legend">
+          <span class="legend-current">
+            <strong>Rot: I</strong> · technische Stromrichtung
+          </span>
+
+          <span class="legend-field">
+            <strong>Grün: H</strong> · magnetische Feldstärke
+          </span>
+        </div>
+
+        <p class="minor">
+          Dickere Pfeile bzw. Linien stehen symbolisch
+          für größere Beträge von I bzw. H.
+        </p>
+
+        <div class="display">
+
+          <div class="label">
+            VIRTUELLES TESLAMETER · Flussdichte B
+          </div>
+
+          <div class="reading">
+            <output id="bValue"></output>
+            <small>mT</small>
+          </div>
+
+          <div class="h-reading">
+            <div class="label">
+              ZUGEHÖRIGE MAGNETISCHE FELDSTÄRKE H
+            </div>
+
+            <div class="value">
+              <output id="hValue"></output>
+              <small>A/m</small>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="minor">
+          Berechnete Modellwerte einer idealisierten Luftspule.
+          Das Teslameter zeigt B; die zugehörige Feldstärke H
+          wird zusätzlich angezeigt.
+        </p>
+
+      </section>
+
+      <section aria-label="Bedienung">
+
+        <div class="control">
+          <label for="slider" id="controlLabel"></label>
+          <output id="controlValue" for="slider"></output>
+
+          <input id="slider" type="range">
+
+          <div class="limits">
+            <span id="minLabel"></span>
+            <span id="maxLabel"></span>
+          </div>
+
+          <p class="minor">
+            Schiebe den Regler mit dem Finger; am Computer
+            kannst du auch die Pfeiltasten verwenden.
+          </p>
+
+          <button id="reset">
+            Startwert wiederherstellen
+          </button>
+        </div>
+
+      </section>
+    </div>
+
+    <div class="actions">
+      <button id="prev">← Zurück</button>
+      <button class="primary" id="next">Weiter →</button>
+    </div>
+
+    <section
+      class="note"
+      id="finish"
+      aria-labelledby="finishTitle"
+      tabindex="-1"
+      hidden>
+
+      <h3 id="finishTitle">
+        Gemeinsame Zusammenführung mit der Lehrerin
+      </h3>
+
+      <p>
+        Vergleicht eure Ergebnisse zu Stromstärke,
+        Windungszahl und Spulenlänge.
+      </p>
+
+      <p>
+        Entwickelt daraus gemeinsam einen Formelvorschlag
+        für H: Welche Größen gehören in den Zähler,
+        welche in den Nenner?
+      </p>
+    </section>
+
+  </article>
+
+  <details>
+    <summary>Modell und Grenzen der Simulation</summary>
+
+    <p>
+      Wir betrachten das näherungsweise homogene Feld
+      im Inneren einer idealisierten langen Luftspule.
+      Kernmaterial und Permeabilität bleiben unverändert.
+      Randfelder, Erwärmung und Messfehler werden
+      nicht nachgebildet.
+    </p>
+
+    <p>
+      In Luft sind B und H näherungsweise proportional:
+      B = μ₀ · H. Deshalb zeigen beide in diesem Modell
+      dieselben relativen Änderungen.
+      Bei Eisenkernen gilt diese einfache Übertragung
+      nicht voraussetzungslos.
+    </p>
+
+    <p>
+      Die tatsächliche Windungszahl steht in den Angaben.
+      Die sichtbaren Windungen stellen diese
+      nur symbolisch dar.
+      Die Feldlinien sind nur im Inneren gezeigt;
+      das äußere Rückfeld wird nicht dargestellt.
+    </p>
+
+    <p>
+      Proportionalität bedeutet genauer:
+      Eine Verdopplung der Einflussgröße führt
+      zu einer Verdopplung der abhängigen Größe.
+      Bei Antiproportionalität führt eine Verdopplung
+      dagegen zur Halbierung.
+    </p>
+  </details>
+
+</main>
+
+<footer>
+  Magnetlabor · Ohne Anmeldung, Kamera oder Sensorfreigabe ·
+  Ergebnisse auf dem Arbeitsblatt notieren
+</footer>
+
+<script>
+"use strict";
+
+/* Näherungswert der magnetischen Feldkonstante. */
+const MU0 = 4 * Math.PI * 1e-7;
+
+const experiments = [
+  {
+    title: "Wie wirkt die Stromstärke?",
+    step: "Versuch 1 · Arbeitsblatt Schritt 2",
+
+    task:
+      "Verändere die Stromstärke I mit dem Schieberegler " +
+      "und beschreibe auf dem Arbeitsblatt, ob H bei " +
+      "gleichbleibender Windungszahl und Spulenlänge " +
+      "proportional zu I (je größer I, desto größer H) " +
+      "oder antiproportional zu I " +
+      "(je größer I, desto kleiner H) ist.",
+
+    key: "I",
+    symbol: "I",
+    spokenSymbol: "I",
+    label: "Stromstärke I",
+    unit: "A",
+
+    min: 0.1,
+    max: 0.6,
+    stepSize: 0.05,
+    start: 0.3,
+
+    N: 600,
+    I: 0.3,
+    l: 0.2
+  },
+
+  {
+    title: "Wie wirkt die Windungszahl?",
+    step: "Versuch 2 · Arbeitsblatt Schritt 3",
+
+    task:
+      "Verändere die Windungszahl N mit dem Schieberegler " +
+      "und beschreibe auf dem Arbeitsblatt, ob H bei " +
+      "gleichbleibender Stromstärke und Spulenlänge " +
+      "proportional zu N (je größer N, desto größer H) " +
+      "oder antiproportional zu N " +
+      "(je größer N, desto kleiner H) ist.",
+
+    key: "N",
+    symbol: "N",
+    spokenSymbol: "N",
+    label: "Windungszahl N",
+    unit: "Windungen",
+
+    min: 300,
+    max: 1200,
+    stepSize: 100,
+    start: 600,
+
+    N: 600,
+    I: 0.3,
+    l: 0.2
+  },
+
+  {
+    title: "Wie wirkt die Spulenlänge?",
+    step: "Versuch 3 · Arbeitsblatt Schritt 4",
+
+    task:
+      "Verändere die Spulenlänge ℓ mit dem Schieberegler " +
+      "und beschreibe auf dem Arbeitsblatt, ob H bei " +
+      "gleichbleibender Gesamtwindungszahl und Stromstärke " +
+      "proportional zu ℓ (je größer ℓ, desto größer H) " +
+      "oder antiproportional zu ℓ " +
+      "(je größer ℓ, desto kleiner H) ist.",
+
+    key: "l",
+    symbol: "ℓ",
+    spokenSymbol: "der Spulenlänge",
+    label: "Spulenlänge ℓ",
+    unit: "cm",
+
+    min: 10,
+    max: 40,
+    stepSize: 1,
+    start: 20,
+
+    N: 1200,
+    I: 0.3,
+    l: 0.2
+  }
+];
+
+const $ = id => document.getElementById(id);
+
+const de = (value, digits) =>
+  value.toLocaleString("de-DE", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  });
+
+let step = 0;
+
+/* Die Reglerwerte bleiben beim Wechsel der Versuche erhalten. */
+const savedValues = experiments.map(
+  experiment => experiment.start
+);
+
+function model(N, I, l) {
+  const H = N * I / l;
+
+  return {
+    H,
+    B: MU0 * H * 1000
+  };
+}
+
+function parameters() {
+  const experiment = experiments[step];
+
+  const values = {
+    N: experiment.N,
+    I: experiment.I,
+    l: experiment.l
+  };
+
+  values[experiment.key] =
+    Number($("slider").value) /
+    (experiment.key === "l" ? 100 : 1);
+
+  return values;
+}
+
+function draw(values, H) {
+  const width = 150 + values.l * 500;
+  const left = 280 - width / 2;
+
+  /*
+    Die sichtbare Windungszahl ist symbolisch reduziert.
+    Alle Segmente bilden zusammen einen durchgehenden Leiter.
+  */
+  const turns = Math.max(
+    5,
+    Math.round(values.N / 60)
+  );
+
+  /*
+    Gleiche Darstellungsskalen in allen drei Versuchen:
+    Rot verändert sich nur mit I, Grün verändert sich mit H.
+  */
+  const currentThickness =
+    2 + 6 * (values.I / 0.6);
+
+  const fieldThickness =
+    1 + 4 * Math.min(H / 3600, 1);
+
+  function wirePoint(t) {
+    const angle = t * turns * 2 * Math.PI;
+
+    return {
+      x: left + width * t - 12 * Math.cos(angle),
+      y: 125 + 52 * Math.sin(angle)
+    };
+  }
+
+  function sectionPath(startT, endT, samples) {
+    let path = "";
+
+    for (let i = 0; i <= samples; i++) {
+      const t =
+        startT + (endT - startT) * i / samples;
+
+      const point = wirePoint(t);
+
+      path +=
+        (i === 0 ? "M " : " L ") +
+        point.x.toFixed(2) + " " +
+        point.y.toFixed(2);
+    }
+
+    return path;
+  }
+
+  /*
+    Vorder- und Rückseite des durchgehenden Drahts.
+    Die Abschnitte schließen lückenlos aneinander an.
+  */
+  let backPaths = "";
+  let frontPaths = "";
+
+  for (let turn = 0; turn < turns; turn++) {
+    const start = turn / turns;
+    const middle = (turn + 0.5) / turns;
+    const end = (turn + 1) / turns;
+
+    const frontPath =
+      sectionPath(start, middle, 60);
+
+    const backPath =
+      sectionPath(middle, end, 60);
+
+    frontPaths += `
+      <path
+        d="${frontPath}"
+        stroke="#b46c30"
+        stroke-width="3"
+        stroke-linecap="round"
+        fill="none"
+      />
+    `;
+
+    backPaths += `
+      <path
+        d="${backPath}"
+        stroke="#c8905e"
+        stroke-width="3"
+        stroke-linecap="round"
+        fill="none"
+      />
+    `;
+  }
+
+  const wireStart = wirePoint(0);
+  const wireEnd = wirePoint(1);
+
+  frontPaths += `
+    <path
+      d="M ${left - 42} 125
+         L ${wireStart.x} ${wireStart.y}"
+      stroke="#b46c30"
+      stroke-width="3"
+      stroke-linecap="round"
+      fill="none"
+    />
+
+    <path
+      d="M ${wireEnd.x} ${wireEnd.y}
+         L ${left + width + 42} 125"
+      stroke="#b46c30"
+      stroke-width="3"
+      stroke-linecap="round"
+      fill="none"
+    />
+
+    <circle
+      cx="${left - 42}"
+      cy="125"
+      r="4"
+      fill="#b46c30"
+    />
+
+    <circle
+      cx="${left + width + 42}"
+      cy="125"
+      r="4"
+      fill="#b46c30"
+    />
+  `;
+
+  $("coilBack").innerHTML = backPaths;
+  $("coilFront").innerHTML = frontPaths;
+
+  /* Strompfeil entlang eines vorderen Drahtabschnitts. */
+  const middleTurn = Math.floor(turns / 2);
+
+  const currentStart =
+    (middleTurn + 0.04) / turns;
+
+  const currentEnd =
+    (middleTurn + 0.34) / turns;
+
+  const currentPath =
+    sectionPath(currentStart, currentEnd, 45);
+
+  const currentLabel =
+    wirePoint((middleTurn + 0.25) / turns);
+
+  $("current").innerHTML = `
+    <path
+      d="${currentPath}"
+      stroke="#d52232"
+      stroke-width="${currentThickness}"
+      stroke-linecap="round"
+      fill="none"
+      marker-end="url(#currentArrow)"
+    />
+
+    <text
+      x="${currentLabel.x + 18}"
+      y="${currentLabel.y + 9}"
+      fill="#d52232"
+      stroke="#f2f6f0"
+      stroke-width="4"
+      paint-order="stroke"
+      font-size="23"
+      font-weight="700"
+      font-style="italic">
+      I
+    </text>
+  `;
+
+  /* Feldlinien im Inneren der Spule. */
+  let field = "";
+
+  for (let i = 0; i < 5; i++) {
+    const y = 95 + i * 15;
+
+    field += `
+      <path
+        d="M ${left - 24} ${y}
+           H ${left + width + 24}"
+        stroke="#00715b"
+        stroke-width="${fieldThickness}"
+        stroke-linecap="round"
+        fill="none"
+        marker-end="url(#fieldArrow)"
+      />
+    `;
+  }
+
+  field += `
+    <text
+      x="${left + width + 40}"
+      y="108"
+      fill="#00715b"
+      font-size="24"
+      font-weight="700"
+      font-style="italic">
+      H
+    </text>
+  `;
+
+  $("field").innerHTML = field;
+
+  $("lengthLine").setAttribute(
+    "d",
+    `M ${left} 190 v 13
+     M ${left} 197 H ${left + width}
+     M ${left + width} 190 v 13`
+  );
+
+  $("lengthText").textContent =
+    "ℓ = " + de(values.l * 100, 0) + " cm";
+}
+
+function update() {
+  const experiment = experiments[step];
+  const sliderValue = Number($("slider").value);
+
+  savedValues[step] = sliderValue;
+
+  const values = parameters();
+
+  const result =
+    model(values.N, values.I, values.l);
+
+  $("controlValue").textContent =
+    de(
+      sliderValue,
+      experiment.key === "I" ? 3 : 0
+    ) +
+    " " +
+    experiment.unit;
+
+  $("slider").setAttribute(
+    "aria-valuetext",
+    $("controlValue").textContent
+  );
+
+  $("bValue").textContent = de(result.B, 3);
+  $("hValue").textContent = de(result.H, 0);
+
+  const facts = [
+    "N = " + de(values.N, 0),
+    "I = " + de(values.I, 3) + " A",
+    "ℓ = " + de(values.l * 100, 0) + " cm"
+  ];
+
+  $("facts").replaceChildren(
+    ...facts.map(text => {
+      const element = document.createElement("span");
+      element.textContent = text;
+      return element;
+    })
+  );
+
+  draw(values, result.H);
+}
+
+function renderRelations(experiment) {
+  const symbol = experiment.symbol;
+
+  $("directSymbol").textContent = symbol;
+  $("inverseSymbol").textContent = symbol;
+
+  $("directSymbol").classList.toggle(
+    "length-symbol",
+    experiment.key === "l"
+  );
+
+  $("inverseSymbol").classList.toggle(
+    "length-symbol",
+    experiment.key === "l"
+  );
+
+  $("directExplanation").textContent =
+    `Je größer ${symbol}, desto größer H.`;
+
+  $("inverseExplanation").textContent =
+    `Je größer ${symbol}, desto kleiner H.`;
+
+  $("directFormula").setAttribute(
+    "aria-label",
+    `H ist proportional zu ${experiment.spokenSymbol}`
+  );
+
+  $("inverseFormula").setAttribute(
+    "aria-label",
+    `H ist proportional zum Kehrwert von ${experiment.spokenSymbol}`
+  );
+}
+
+function render() {
+  const experiment = experiments[step];
+
+  $("title").textContent = experiment.title;
+  $("stepLabel").textContent = experiment.step;
+  $("task").textContent = experiment.task;
+
+  $("controlLabel").textContent = experiment.label;
+
+  $("slider").min = experiment.min;
+  $("slider").max = experiment.max;
+  $("slider").step = experiment.stepSize;
+  $("slider").value = savedValues[step];
+
+  $("minLabel").textContent =
+    de(
+      experiment.min,
+      experiment.key === "I" ? 1 : 0
+    ) +
+    " " +
+    experiment.unit;
+
+  $("maxLabel").textContent =
+    de(
+      experiment.max,
+      experiment.key === "I" ? 1 : 0
+    ) +
+    " " +
+    experiment.unit;
+
+  $("prev").hidden = step === 0;
+
+  $("next").textContent =
+    step === 2
+      ? "Zur gemeinsamen Zusammenführung →"
+      : step === 1
+        ? "Weiter zu Versuch 3 →"
+        : "Weiter zu Versuch 2 →";
+
+  $("finish").hidden = true;
+
+  document.querySelectorAll("nav a")
+    .forEach((link, index) => {
+      if (index === step) {
+        link.setAttribute("aria-current", "step");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+
+  renderRelations(experiment);
+  update();
+}
+
+function route() {
+  const match =
+    location.hash.match(/^#versuch-([123])$/);
+
+  step = match ? Number(match[1]) - 1 : 0;
+
+  render();
+}
+
+$("slider").addEventListener("input", update);
+
+$("reset").onclick = () => {
+  $("slider").value = experiments[step].start;
+  update();
+};
+
+$("prev").onclick = () => {
+  location.hash = "versuch-" + step;
+};
+
+$("next").onclick = () => {
+  if (step < 2) {
+    location.hash = "versuch-" + (step + 2);
+  } else {
+    $("finish").hidden = false;
+
+    $("finish").scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    $("finish").focus({
+      preventScroll: true
+    });
+  }
+};
+
+window.addEventListener("hashchange", () => {
+  route();
+
+  $("title").focus({
+    preventScroll: true
+  });
+
+  $("title").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+});
+
+route();
+</script>
+
+</body>
+</html>
